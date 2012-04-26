@@ -1,7 +1,12 @@
+// Config file example
+// ===================
+//
+// Copy to config.js and edit
+
 // Values for final, published RSS feed.
 var SOCIALFEEDRSSINFO = {
     title:      'RSS Feed Name',
-    site_url:   'Your Site's Url,
+    site_url:   'Your Sites Url',
     author:     'Author Name' 
 };
 
@@ -19,3 +24,4 @@ var SITES = {
 
 exports.SOCIALFEEDRSSINFO = SOCIALFEEDRSSINFO;
 exports.SITES = SITES;
+

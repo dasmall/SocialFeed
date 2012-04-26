@@ -5,7 +5,7 @@
 
 var express = require('express')
   , routes = require('./routes'),
-    socialfeed = require('./socialfeed-live')
+    socialfeed = require('./socialfeed')
     ;
 
 var app = module.exports = express.createServer();

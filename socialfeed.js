@@ -1,16 +1,7 @@
-var SOCIALFEEDRSSINFO = {
-    title:      'Federated Travel\'s Social Status Humanizer',
-    site_url:   'www.federatedtravel.com',
-    author:     'Federated Travel' 
-};
+config = require('./config.js.EXAMPLE');
 
-// Key/Value store of EAN RSS campaigns for each hotel site.
-var SITES = {
-    miami: {
-        author: '', // Author for final processed RSS feed.
-        eanRssFeed: '' // Unprocessed, incoming RSS feed link here.
-    }
-};
+SOCIALFEEDRSSINFO = config.SOCIALFEEDRSSINFO;
+SITES = config.SITES;
 
 // Array of tweets/statuses to be published.
 var TWITTERPHRASES = [
@@ -58,7 +49,7 @@ var PHRASE_FIELDS = {
     duration:"1 night(s)"
 };
 
-var feed = new RSS(SOCIALFEEDRSSINFO);
+var feed = new RSS(config.SOCIALFEEDRSSINFO);
 
 // Returns processed RSS.
 function done_parsing(site, error, meta, articles) {
@@ -121,7 +112,7 @@ function parse_feed(site) {
 
 function process_site(site_name, results_callback) {
     
-    var site = SITES[site_name];
+    var site = config.SITES[site_name];
     console.log('Site object: ', site)
     //if (!site) return;
 

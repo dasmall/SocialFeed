@@ -1,7 +1,7 @@
-config = require('./config.js.EXAMPLE');
+var config = require('./config.js');
 
-SOCIALFEEDRSSINFO = config.SOCIALFEEDRSSINFO;
-SITES = config.SITES;
+var SOCIALFEEDRSSINFO = config.SOCIALFEEDRSSINFO;
+var SITES = config.SITES;
 
 // Array of tweets/statuses to be published.
 var TWITTERPHRASES = [

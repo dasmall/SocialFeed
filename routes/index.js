@@ -24,8 +24,6 @@ exports.siteLookup = function(req, res) {
 		
 	if(site.length>0){
 		sf.process(site, function(xml_result) {
-			//console.log('xml result', xml_result);
-			//console.log('XML Result', xml_result)
 			res.contentType('xml');
 			//res.render('feed', xml_result);
 			res.send(xml_result);

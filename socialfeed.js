@@ -41,13 +41,13 @@ var STANDARDPHRASE = [
     "Browse our hotel selection for your next trip.",
     "Did you know about our best price guarantee?",
     "Tons of hotels to choose from.",
-    "Book your next hotel through with us."
+    "Book your next hotel through us."
 ];
 
 var FeedParser = require('feedparser');
 var fs = require('fs'); // Module for writing to files. *--- To be removed ---*
 var RSS = require('rss'); // Module used to create RSS output
-var parser = new FeedParser();
+
 
 // Fields to be replaced in final TWITTERPHRASES instances.
 var PHRASE_FIELDS = {
@@ -63,7 +63,7 @@ var feed = new RSS(config.SOCIALFEEDRSSINFO);
 // Returns processed RSS.
 function done_parsing(site, error, meta, articles) {
 	if (error) {
-		console.log("Feed timeout. Now replacing strings with fallback phrases.", error);
+		//console.log("----> Error event handling. Now replacing strings with fallback phrases.", error);
 
         var text = STANDARDPHRASE[randomIndex(STANDARDPHRASE)];
         
@@ -151,24 +151,28 @@ function list_sites(){
 // Extract (raw) EAN RSS items.
 function parse_feed(site) {
     // Pass in EAN's RSS feed to be parsed. Wait for {timeout period} before spewing an error.
-    options = {uri:site.eanRssFeed, timeout:1};
+    options = {uri:site.eanRssFeed, timeout:3000};
     var parseF = function(error, meta, articles) {
         done_parsing(site, error, meta, articles);
     }
-
+    var parser = new FeedParser();
     parser.parseUrl(options, parseF);
-    parser.on('error', function(error) { 
-        parseF(error, null, null)
+    parser.on('error', function(error) {
+        if(error.code === 'ETIMEDOUT'){
+            console.log("-----> Error event response to: ", error);
+            parseF(error, null, null)
+        }
+        else{
+            console.log("-----> Error that wasn't accounted for: ", error.code)
+        }
     });  
 }      
 
 
 function process_site(site_name, results_callback) {
-    
     var site = config.SITES[site_name];
     //console.log('Site object: ', site)
     //if (!site) return;
-
     site.results_callback = results_callback;
     parse_feed(site);
 }

@@ -33,7 +33,15 @@ var TWITTERPHRASES = [
     "We could put something witty here about our {location} hotel room deals. Here's the link to book one instead.",
     "Feeling lucky? Here are surprize hotel room options for you.",
     "Always been told 'Get a room'? You can do that {deal} with us."
+];
 
+// Phrases to be used as a fallback if EAN doesn't give us supply a timely feed.
+var STANDARDPHRASE = [
+    "Check us out.",
+    "Browse our hotel selection for your next trip.",
+    "Did you know about our best price guarantee?",
+    "Tons of hotels to choose from.",
+    "Book your next hotel through with us."
 ];
 
 var FeedParser = require('feedparser');
@@ -50,18 +58,40 @@ var PHRASE_FIELDS = {
 };
 
 var feed = new RSS(config.SOCIALFEEDRSSINFO);
+//console.log("Feed object: ", feed);
 
 // Returns processed RSS.
 function done_parsing(site, error, meta, articles) {
 	if (error) {
-		console.log("error", error);
+		console.log("Feed timeout. Now replacing strings with fallback phrases.", error);
+
+        var text = STANDARDPHRASE[randomIndex(STANDARDPHRASE)];
+        
+        feed.item({
+            //title: article.title,
+            description: text,
+            url: site.author,
+            author: site.author
+        });
+
+        var xml = feed.xml();
+        //console.log("feed.xml()", xml);
+        
+        // *--- To be removed ---*
+        //fs.writeFile('myfeed.xml', xml);
+        
+        if (site.results_callback)
+            site.results_callback(xml);
+        else
+            site.results_callback('Unable to retrieve site RSS data.')
+
 	} else {
 		for (var idx in articles) {
 			humanize_article(site, articles[idx])
 		}
 
         var xml = feed.xml();
-        //console.log(xml);
+        //console.log("feed.xml()", xml);
         
         // *--- To be removed ---*
         //fs.writeFile('myfeed.xml', xml);
@@ -72,14 +102,20 @@ function done_parsing(site, error, meta, articles) {
             site.results_callback('Unable to retrieve site RSS data.')
 	}
     
-    // Re-instantiates object after xml update. Eliminates persisting values and duplicate listings.
-    feed = new RSS();
+    // Re-instantiates object after xml update. Eliminates persisting values and duplicate listings when reloading
+    // the page while the app runs.
+    feed = new RSS(config.SOCIALFEEDRSSINFO);
+}
+
+function randomIndex(phraseBank){
+    return Math.floor((Math.random()*phraseBank.length));
 }
 
 // Processes raw EAN RSS items and populates huamnized 'feed' RSS object.
 function humanize_article(site, article){
     //Random number used to index into TWITTERPHRASES
-	var randomNum = Math.floor((Math.random()*TWITTERPHRASES.length));
+	//var randomNum = Math.floor((Math.random()*TWITTERPHRASES.length));
+    var randomNum = randomIndex(TWITTERPHRASES);
 	var text = TWITTERPHRASES[randomNum];
 
     // Values to replace {deal} {location fields} in raw TWITTERPHRASES for an RSS item.
@@ -103,17 +139,34 @@ function humanize_article(site, article){
     })
 }
 
+/*
+function list_sites(){
+    var names = new Array();
+    for (var idx in config.SITES)
+        names = config.SITES[idx]
+    //return names[];
+}
+*/
+
 // Extract (raw) EAN RSS items.
 function parse_feed(site) {
-    parser.parseUrl(site.eanRssFeed, function(error, meta, articles) {
+    // Pass in EAN's RSS feed to be parsed. Wait for {timeout period} before spewing an error.
+    options = {uri:site.eanRssFeed, timeout:1};
+    var parseF = function(error, meta, articles) {
         done_parsing(site, error, meta, articles);
-    });
-}
+    }
+
+    parser.parseUrl(options, parseF);
+    parser.on('error', function(error) { 
+        parseF(error, null, null)
+    });  
+}      
+
 
 function process_site(site_name, results_callback) {
     
     var site = config.SITES[site_name];
-    console.log('Site object: ', site)
+    //console.log('Site object: ', site)
     //if (!site) return;
 
     site.results_callback = results_callback;
@@ -121,5 +174,5 @@ function process_site(site_name, results_callback) {
 }
 
 exports.process = process_site;
-
+//
 //process_site('miami');

@@ -30,7 +30,7 @@ var TWITTERPHRASES = [
     "Thought about staying in a {location} hotel room? Do it {deal}.",
     "Have a look at which hotel rooms you can book {deal}.",
     "Party, sleep or maybe party in your sleep while staying at a {location} hotel {deal}.",
-    "We could put something witty here about our {location} hotel room deals. Here's the link to book one instead.",
+    "We could put something witty here about our {location} hotel room deals but here's the link to book one instead.",
     "Feeling lucky? Here are surprize hotel room options for you.",
     "Always been told 'Get a room'? You can do that {deal} with us."
 ];
@@ -66,6 +66,8 @@ function done_parsing(site, error, meta, articles) {
 		//console.log("----> Error event handling. Now replacing strings with fallback phrases.", error);
 
         var text = STANDARDPHRASE[randomIndex(STANDARDPHRASE)];
+
+        var options = {description:text, url:site.author, author:site.author};
         
         feed.item({
             //title: article.title,
@@ -73,34 +75,20 @@ function done_parsing(site, error, meta, articles) {
             url: site.author,
             author: site.author
         });
-
-        var xml = feed.xml();
         //console.log("feed.xml()", xml);
         
         // *--- To be removed ---*
         //fs.writeFile('myfeed.xml', xml);
-        
-        if (site.results_callback)
-            site.results_callback(xml);
-        else
-            site.results_callback('Unable to retrieve site RSS data.')
-
 	} else {
 		for (var idx in articles) {
 			humanize_article(site, articles[idx])
 		}
-
-        var xml = feed.xml();
-        //console.log("feed.xml()", xml);
-        
-        // *--- To be removed ---*
-        //fs.writeFile('myfeed.xml', xml);
-        
-        if (site.results_callback)
-            site.results_callback(xml);
-        else
-            site.results_callback('Unable to retrieve site RSS data.')
 	}
+    var xml = feed.xml();
+    if (site.results_callback)
+        site.results_callback(xml);
+    else
+        site.results_callback('Unable to retrieve site RSS data.')
     
     // Re-instantiates object after xml update. Eliminates persisting values and duplicate listings when reloading
     // the page while the app runs.
@@ -151,7 +139,7 @@ function list_sites(){
 // Extract (raw) EAN RSS items.
 function parse_feed(site) {
     // Pass in EAN's RSS feed to be parsed. Wait for {timeout period} before spewing an error.
-    options = {uri:site.eanRssFeed, timeout:3000};
+    options = {uri:site.eanRssFeed, timeout:1};
     var parseF = function(error, meta, articles) {
         done_parsing(site, error, meta, articles);
     }
@@ -159,7 +147,7 @@ function parse_feed(site) {
     parser.parseUrl(options, parseF);
     parser.on('error', function(error) {
         if(error.code === 'ETIMEDOUT'){
-            console.log("-----> Error event response to: ", error);
+            console.log("-----> Error expected and handled: ", error);
             parseF(error, null, null)
         }
         else{
@@ -167,7 +155,6 @@ function parse_feed(site) {
         }
     });  
 }      
-
 
 function process_site(site_name, results_callback) {
     var site = config.SITES[site_name];

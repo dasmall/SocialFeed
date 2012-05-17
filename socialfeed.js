@@ -139,7 +139,7 @@ function list_sites(){
 // Extract (raw) EAN RSS items.
 function parse_feed(site) {
     // Pass in EAN's RSS feed to be parsed. Wait for {timeout period} before spewing an error.
-    options = {uri:site.eanRssFeed, timeout:1};
+    options = {uri:site.eanRssFeed, timeout:5000};
     var parseF = function(error, meta, articles) {
         done_parsing(site, error, meta, articles);
     }

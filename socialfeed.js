@@ -9,8 +9,8 @@ var TWITTERPHRASES = [
     "Planning a vacay for {location}? Stay {deal}. Make it happen.",
     "Vacation in {location} {deal}.",
     "Run away to {location} hotels {deal}.",
-    "Check out {location} hotel deals {deal}.",
-    "Find hotels in {location} {deal}.",
+    "Check our {location} hotel deals {deal}.",
+    "Find hotels {deal}. Come visit.",
     "Explore {location} with ease. Book a room {deal}.",
     "{location} has hotel rooms {deal}.",
     "Relax in a {location} hotel {deal}.",
@@ -62,6 +62,7 @@ var feed = new RSS(config.SOCIALFEEDRSSINFO);
 
 // Returns processed RSS.
 function done_parsing(site, error, meta, articles) {
+    // In the event of an error in getting the EAN feed, output STANDARDPHRASE otherwise get to humanizing below!
 	if (error) {
 		//console.log("----> Error event handling. Now replacing strings with fallback phrases.", error);
 
@@ -70,8 +71,8 @@ function done_parsing(site, error, meta, articles) {
         var options = {description:text, url:site.author, author:site.author};
         
         feed.item({
-            //title: article.title,
-            description: text,
+            title: text,
+            description: "",
             url: site.author,
             author: site.author
         });
@@ -120,8 +121,9 @@ function humanize_article(site, article){
 	
     // Appends to processed RSS.
     feed.item({
-        title: article.title,
-        description: text,
+        title: text,
+        //title: article.title,
+        description: "",
         url: article.link,
         author: site.author
     })

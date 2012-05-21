@@ -3,8 +3,36 @@ var config = require('./config.js');
 var SOCIALFEEDRSSINFO = config.SOCIALFEEDRSSINFO;
 var SITES = config.SITES;
 
-// Array of tweets/statuses to be published.
-var TWITTERPHRASES = [
+// Array of tweets/statuses to be published excluding location data.
+var SINGLECITYPHRASES = [
+    "Book your next hotel room {deal} with us.",
+    "Planning a vacay or know someone who is? Stay {deal}. Make it happen.",
+    "Start booking your next vacation here {deal}.",
+    "Check our current hotel deals {deal}.",
+    "Find hotels {deal}. Come visit.",
+    "Relax here {deal}.",
+    "Looking for somewhere to stay during your visit? Book a hotel room {deal}.",
+    "Treat yourself. Stay in one of our hotels {deal}.",
+    "Visit and relax with hotel rooms {deal}.",
+    "Don't go broke just for a vacation. Book with us {deal}.",
+    "Take a vacation. Get a room {deal}.",
+    "[You] + [a one of our hotels] = [downtime]. Re-energize {deal}. You deserve it.",
+    "Clear your mind. Book a room from {deal}. Escape. Refresh. Relax.",
+    "Live in the city? Why not have a staycation for once? Book a room {deal}.",
+    "Take a breather from your everyday routine. We have hotel rooms {deal}.",
+    "Be a tourist. Book a room {deal} with us but don't forget the fanny pack!",
+    "Closed blinds. Room service. Serenity. Click for our hotels {deal}.",
+    "No alarms. No email. Sleep. We're offering you hotel rooms {deal}. Book yours!",
+    "Did you know that you could get room with us {deal}? Check us out!",
+    "Have a look at which hotel rooms you can book {deal}.",
+    "Party, sleep or maybe party in your sleep while staying at one of our hotels {deal}.",
+    "We could put something witty here about another one of our hotel room deals but here's a link to book one instead. You're welcome!",
+    "Feeling lucky? Here are surprize hotel room options for you.",
+    'Always been told "Get a room"? You can do that {deal} with us.'
+];
+
+// Used with sites like Cheap where it publishes deals for multiple locations/cities.
+var MULTICITYPHRASES = [
     "Going to {location}? Book a hotel room {deal}.",
     "Planning a vacay for {location}? Stay {deal}. Make it happen.",
     "Vacation in {location} {deal}.",
@@ -28,11 +56,9 @@ var TWITTERPHRASES = [
     "Closed blinds. Room service. Serenity. {location} hotels {deal}.",
     "No alarms. No email. Sleep. {location} hotel rooms {deal}. Book yours!",
     "Thought about staying in a {location} hotel room? Do it {deal}.",
-    "Have a look at which hotel rooms you can book {deal}.",
     "Party, sleep or maybe party in your sleep while staying at a {location} hotel {deal}.",
     "We could put something witty here about our {location} hotel room deals but here's the link to book one instead.",
-    "Feeling lucky? Here are surprize hotel room options for you.",
-    "Always been told 'Get a room'? You can do that {deal} with us."
+    "Feeling lucky? Here are surprize hotel room options for you."
 ];
 
 // Phrases to be used as a fallback if EAN doesn't give us supply a timely feed.
@@ -49,7 +75,7 @@ var fs = require('fs'); // Module for writing to files. *--- To be removed ---*
 var RSS = require('rss'); // Module used to create RSS output
 
 
-// Fields to be replaced in final TWITTERPHRASES instances.
+// Fields to be replaced in final SINGLECITYPHRASES instances.
 var PHRASE_FIELDS = {
     location:"{location}",
     deal:"{deal}",
@@ -102,12 +128,23 @@ function randomIndex(phraseBank){
 
 // Processes raw EAN RSS items and populates huamnized 'feed' RSS object.
 function humanize_article(site, article){
-    //Random number used to index into TWITTERPHRASES
-	//var randomNum = Math.floor((Math.random()*TWITTERPHRASES.length));
-    var randomNum = randomIndex(TWITTERPHRASES);
-	var text = TWITTERPHRASES[randomNum];
+    //Random number used to index into SINGLECITYPHRASES
+	//var randomNum = Math.floor((Math.random()*SINGLECITYPHRASES.length));
+    
+    if (!site.multiCity){
+        //assign appropriate phrase arrays
+        var phrases = SINGLECITYPHRASES;
+    }
+    else
+    {
+        var phrases = MULTICITYPHRASES;
+    }
 
-    // Values to replace {deal} {location fields} in raw TWITTERPHRASES for an RSS item.
+    var randomNum = randomIndex(phrases);
+    var text = phrases[randomNum];
+
+
+    // Values to replace {deal} {location fields} in raw SINGLECITYPHRASES for an RSS item.
     var phraseValues = {
         location:article.title,
         deal:article.description,
@@ -115,7 +152,7 @@ function humanize_article(site, article){
         duration: "a night"       
     };
 
-    // Replaces {deal} {location} fields in TWITTERPHRASES. Polishes it to 'human' form.
+    // Replaces {deal} {location} fields in SINGLECITYPHRASES. Polishes it to 'human' form.
     for (var idx in PHRASE_FIELDS)
     	text = text.replace(PHRASE_FIELDS[idx], phraseValues[idx]);
 	

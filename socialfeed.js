@@ -131,8 +131,9 @@ function humanize_article(site, article){
     //Random number used to index into SINGLECITYPHRASES
 	//var randomNum = Math.floor((Math.random()*SINGLECITYPHRASES.length));
     
+    // Select which phrase bank to use based on whether or not we will be outputting the location in the finished status.
+    // Eg. Miami only refers to Miami, therefore it's redundant to mention Miami in any status updates.
     if (!site.multiCity){
-        //assign appropriate phrase arrays
         var phrases = SINGLECITYPHRASES;
     }
     else
